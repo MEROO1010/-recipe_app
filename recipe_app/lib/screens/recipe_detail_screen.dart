@@ -1,10 +1,12 @@
+// lib/screens/recipe_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:recipe_app/models/recipe.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
   final Recipe recipe;
 
-  const RecipeDetailScreen({super.key, required this.recipe});
+  RecipeDetailScreen({required this.recipe});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +16,15 @@ class RecipeDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(recipe.image),
+            CachedNetworkImage(
+              imageUrl: recipe.image,
+              placeholder:
+                  (context, url) => Center(child: CircularProgressIndicator()),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
@@ -30,9 +40,9 @@ class RecipeDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: () {
-                  // Open the source URL in a web browser
+                  // Implement this function to open the recipe URL
                 },
-                child: Text('View Recipe'),
+                child: Text('View Full Recipe'),
               ),
             ),
           ],

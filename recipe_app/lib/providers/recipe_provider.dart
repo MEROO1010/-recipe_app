@@ -3,42 +3,30 @@ import 'package:recipe_app/models/recipe.dart';
 import 'package:recipe_app/services/api_service.dart';
 
 class RecipeProvider with ChangeNotifier {
-  final ApiService _apiService = ApiService();
   List<Recipe> _recipes = [];
-  Recipe? _selectedRecipe;
-  bool _isLoading = false;
+  bool _loading = false;
 
   List<Recipe> get recipes => _recipes;
-  Recipe? get selectedRecipe => _selectedRecipe;
-  bool get isLoading => _isLoading;
+  bool get loading => _loading;
 
-  Future<void> fetchPopularRecipes() async {
-    _isLoading = true;
+  Future<void> fetchRecipes(
+    String query, {
+    String? category,
+    String? diet,
+  }) async {
+    _loading = true;
     notifyListeners();
-    _recipes =
-        (await _apiService.fetchPopularRecipes())
-            .map((json) => Recipe.fromJson(json))
-            .toList();
-    _isLoading = false;
-    notifyListeners();
-  }
 
-  Future<void> searchRecipes(String query) async {
-    _isLoading = true;
-    notifyListeners();
-    _recipes =
-        (await _apiService.searchRecipes(
-          query,
-        )).map((json) => Recipe.fromJson(json)).toList();
-    _isLoading = false;
-    notifyListeners();
-  }
-
-  Future<void> fetchRecipeDetails(int id) async {
-    _isLoading = true;
-    notifyListeners();
-    _selectedRecipe = Recipe.fromJson(await _apiService.fetchRecipeDetails(id));
-    _isLoading = false;
-    notifyListeners();
+    try {
+      _recipes =
+          (await ApiService().fetchRecipes(
+            query,
+          )).map((data) => Recipe.fromJson(data)).toList();
+    } catch (error) {
+      _recipes = [];
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
   }
 }

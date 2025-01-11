@@ -1,32 +1,53 @@
-import 'package:dio/dio.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = 'https://api.spoonacular.com/recipes';
-  final String apiKey = 'db585db8c4c1401d8e9b4154f09073c6';
+  static const String _apiKey = 'c0d66d6c21e244c2913a84f41ad4a590';
+  static const String _baseUrl = 'https://api.spoonacular.com';
 
-  final Dio _dio = Dio();
-
-  Future<List<dynamic>> fetchPopularRecipes() async {
-    final response = await _dio.get(
-      '$baseUrl/random',
-      queryParameters: {'apiKey': apiKey, 'number': 10},
+  Future<List<dynamic>> fetchRecipes(String query) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/recipes/complexSearch?query=$query&apiKey=$_apiKey'),
     );
-    return response.data['recipes'];
-  }
 
-  Future<List<dynamic>> searchRecipes(String query) async {
-    final response = await _dio.get(
-      '$baseUrl/complexSearch',
-      queryParameters: {'apiKey': apiKey, 'query': query},
-    );
-    return response.data['results'];
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['results'];
+    } else {
+      throw Exception('Failed to load recipes');
+    }
   }
 
   Future<Map<String, dynamic>> fetchRecipeDetails(int id) async {
-    final response = await _dio.get(
-      '$baseUrl/$id/information',
-      queryParameters: {'apiKey': apiKey},
+    final response = await http.get(
+      Uri.parse('$_baseUrl/recipes/$id/information?apiKey=$_apiKey'),
     );
-    return response.data;
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load recipe details');
+    }
+  }
+
+  Future<List<dynamic>> fetchRecipesWithFilters(
+    String query, {
+    String? category,
+    String? diet,
+  }) async {
+    final params = {
+      'query': query,
+      'apiKey': _apiKey,
+      if (category != null) 'type': category,
+      if (diet != null) 'diet': diet,
+    };
+    final uri = Uri.https(_baseUrl, '/recipes/complexSearch', params);
+
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['results'];
+    } else {
+      throw Exception('Failed to load recipes');
+    }
   }
 }

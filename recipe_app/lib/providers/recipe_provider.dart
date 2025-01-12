@@ -19,8 +19,10 @@ class RecipeProvider with ChangeNotifier {
 
     try {
       _recipes =
-          (await ApiService().fetchRecipes(
+          (await ApiService().fetchRecipesWithFilters(
             query,
+            category: category,
+            diet: diet,
           )).map((data) => Recipe.fromJson(data)).toList();
     } catch (error) {
       _recipes = [];

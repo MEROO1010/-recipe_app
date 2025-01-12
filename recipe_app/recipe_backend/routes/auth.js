@@ -1,7 +1,9 @@
+// routes/auth.js
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -37,18 +39,18 @@ router.post('/login', async (req, res) => {
 
 // Update user profile
 router.put('/profile', auth, async (req, res) => {
-    const { name, email, password } = req.body;
-    try {
-      const updatedData = {};
-      if (name) updatedData.name = name;
-      if (email) updatedData.email = email;
-      if (password) updatedData.password = await bcrypt.hash(password, 10);
-  
-      const updatedUser = await User.findByIdAndUpdate(req.user.id, updatedData, { new: true });
-      res.json(updatedUser);
-    } catch (error) {
-      res.status(500).json({ message: 'Server error' });
-    }
-  });
+  const { name, email, password } = req.body;
+  try {
+    const updatedData = {};
+    if (name) updatedData.name = name;
+    if (email) updatedData.email = email;
+    if (password) updatedData.password = await bcrypt.hash(password, 10);
+
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, updatedData, { new: true });
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 module.exports = router;
